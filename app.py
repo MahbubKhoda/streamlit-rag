@@ -1,5 +1,5 @@
 import streamlit as st
-import pandas as pd
+import os
 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -11,11 +11,14 @@ from langchain.chains.question_answering import load_qa_chain
 import llm_endpoint
 import embedding_endpoint
 
+LLM_ENDPOINT_NAME = os.environ['LLM_ENDPOINT']
+EMBEDDING_ENDPOINT_NAME = os.environ['EMBEDDING_ENDPOINT']
+
 st.title('Q&A with RAG')
 
 @st.cache_resource
 def load_embedding_endpoint():
-    return embedding_endpoint.get_embedding_endpoint("llm-apps-blog-gpt-j-6b-endpoint-d4041480")
+    return embedding_endpoint.get_embedding_endpoint(EMBEDDING_ENDPOINT_NAME)
 my_embedding_endpoint = load_embedding_endpoint()
 
 uploaded_file = st.file_uploader("Upload file for RAG context (only txt or pdf)", type=['txt','pdf'])
@@ -43,7 +46,7 @@ question = st.text_input('Question', None)
 
 @st.cache_resource
 def load_llm_endpoint():
-    return llm_endpoint.get_llm_endpoint("llm-apps-blog-flan-t5-xxl-endpoint-d4041480")
+    return llm_endpoint.get_llm_endpoint(LLM_ENDPOINT_NAME)
 
 my_llm_endpoint = load_llm_endpoint()
 chain = load_qa_chain(llm=my_llm_endpoint, prompt=prompt)
