@@ -11,7 +11,7 @@ model_version = "*"
 
 parameters = {
     "max_length": 200,
-    "num_return_sequences": 1,
+    "num_return_sequences": 5,
     "top_k": 250,
     "top_p": 0.95,
     "do_sample": False,

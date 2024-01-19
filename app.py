@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 
+from langchain.document_loaders import TextLoader
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
@@ -25,18 +26,18 @@ uploaded_file = st.file_uploader("Upload file for RAG context (only txt or pdf)"
 if uploaded_file is not None:
     file_name = uploaded_file.name
     if file_name.split('.')[-1] == 'txt':
-        st.write("it's a text file")
+        with open('temp.txt', 'wb') as f:
+            f.write(uploaded_file.getbuffer())
+        loader = TextLoader('temp.txt')
     elif file_name.split('.')[-1] == 'pdf':
-        st.write("it's a pdf file")
         with open('temp.pdf', 'wb') as f:
             f.write(uploaded_file.getbuffer())
         loader = PyPDFLoader('temp.pdf')
-        documents = loader.load()
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=20)
-        texts = text_splitter.split_documents(documents)
     else:
         st.write("Cannot process the context file")
-    
+    documents = loader.load()
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=20)
+    texts = text_splitter.split_documents(documents)
     docsearch = FAISS.from_documents(texts, my_embedding_endpoint)
 
 prompt_template = """{context}\n\nGiven the above context, answer the following question and do not make up any false information, if the context doesn't have necessary information for the question simply say 'I couldn't find that information':\n{question}\n\nAnswer:"""
